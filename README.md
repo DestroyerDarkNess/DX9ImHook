@@ -1,6 +1,8 @@
 # DX9ImHook
 ![passing](https://img.shields.io/badge/build-passing-brightgreen) 
 
+⚠️ Please, if you like this project, give me a ✨Star✨
+
 This is an example of how to hook Endscene for DX9 and use imgui for some separate process, for example games.
 
 If you like this project, you can consider making a donation. Help us continue to improve the tool.
