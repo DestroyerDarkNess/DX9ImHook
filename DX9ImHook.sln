@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33530.505
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DX9ImHook", "DX9ImHook\DX9ImHook.csproj", "{C7B34D3A-D776-4C10-ABB5-DCF6B1AF791A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C7B34D3A-D776-4C10-ABB5-DCF6B1AF791A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7B34D3A-D776-4C10-ABB5-DCF6B1AF791A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7B34D3A-D776-4C10-ABB5-DCF6B1AF791A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7B34D3A-D776-4C10-ABB5-DCF6B1AF791A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3EBCA192-0C8D-42E8-BA65-AFEEFF708470}
+	EndGlobalSection
+EndGlobal
