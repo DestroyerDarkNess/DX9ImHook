@@ -219,8 +219,10 @@
     <Compile Include="dllmain.cs" />
     <Compile Include="Dx_Hooks.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RawInputHook.cs" />
     <Compile Include="WinAPI.cs" />
     <Compile Include="WindowHook.cs" />
+    <Compile Include="WindowMessageHook.cs" />
     <Compile Include="WM.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

@@ -10,6 +10,25 @@ namespace DX9ImHook
 {
     public static class WinAPI
     {
+
+        [DllImport("user32.dll")]
+        public static extern bool TranslateMessage(ref NativeMessage lpMsg);
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct NativeMessage
+        {
+            public IntPtr handle;
+            public uint msg;
+            public IntPtr wParam;
+            public IntPtr lParam;
+            public uint time;
+            public System.Drawing.Point pt;
+        }
+
+        [DllImport("user32.dll")]    public static extern int GetMessage(out System.Windows.Forms.Message lpMsg, IntPtr hWnd, uint wMsgFilterMin, uint wMsgFilterMax);
+
+        [DllImport("user32.dll")]  public static extern bool PostMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
+
         [DllImport("kernel32.dll", SetLastError = true)]   [return: MarshalAs(UnmanagedType.Bool)] public static extern bool FreeLibrary(IntPtr hModule);
         [DllImport("kernel32.dll")][return: MarshalAs(UnmanagedType.Bool)] public static extern bool AllocConsole();
 

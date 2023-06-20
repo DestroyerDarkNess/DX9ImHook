@@ -72,7 +72,7 @@ namespace DX9ImHook
                     //dev.swapChain.Description.OutputHandle; 
                   
                     var context = cimgui_wrapper.igCreateContext(IntPtr.Zero);
-
+                   
                     ImplWin32.Init(dllmain.GameHandle); //  cimgui_wrapper.ImGui_ImplWin32_Init(dllmain.GameHandle);
                     ImplDX9.Init(device);
 
@@ -98,9 +98,7 @@ namespace DX9ImHook
                     ImGui.NewFrame();     //cimgui_wrapper.igNewFrame();
 
                     ImGuiIOPtr IO = ImGui.GetIO();
-                    IO.BackendFlags = ImGuiBackendFlags.HasSetMousePos | ImGuiBackendFlags.HasMouseCursors;
-                    IO.ConfigFlags = ImGuiConfigFlags.NavEnableKeyboard | ImGuiConfigFlags.NavEnableSetMousePos;
-
+                   
                     IO.MouseDrawCursor = dllmain.ShowImGui_UI;
 
                     //ImGui_ImplWin32_UpdateMousePos();

@@ -3,6 +3,7 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -12,16 +13,33 @@ namespace DX9ImHook
 {
     public static class dllmain
     {
+
+      public enum InputType
+        {
+            WndProc = 0,
+            RawInput = 1,
+            UniversalUnsafe = 2
+      }
+
+
+
         public static int KeyMenu = 0x2D; // VK_INSERT
         public static IntPtr GameHandle = IntPtr.Zero;
         public static void EntryPoint()
         {
 
             GameHandle = System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
+            
 
             /* WinAPI.AllocConsole();*/ // It Change GetCurrentProcess().MainWindowHandle , USE : GameHandle = WinAPI.FindWindow(null, "Halo");
             WinAPI.AllocConsole();
-            
+
+            Console.WriteLine("Game WindowHandle  -->> " + GameHandle.ToString());
+
+
+            InputType HookInputType = InputType.UniversalUnsafe;
+
+
             try
             {
 
@@ -46,8 +64,8 @@ namespace DX9ImHook
 
             try {
                 // Fix RawImput
-                // Fixed Menu on RawImput Games, Type HALO and GTA SA
-                // In the Future it is replaced by: https://github.com/NiekHoekstra/SharpDirectInput
+                // Fixed Menu on RawImput Games, Type HALO 
+
                 Console.ForegroundColor = ConsoleColor.White;
                 IntPtr handle = WinAPI.GetModuleHandle("dinput8.dll");
                 if (handle != IntPtr.Zero)
@@ -60,18 +78,27 @@ namespace DX9ImHook
                     {
                         try
                         {
+                            // By : https://github.com/geeky/dinput8wrapper
                             System.IO.File.WriteAllBytes("dinput8.dll", Properties.Resources.dinput8);
                         }
                         catch { }
                         Console.ForegroundColor = ConsoleColor.Magenta;
                         Console.WriteLine("------->>>>  DirectInput8 is Patched, YOU MUST RESTART THE GAME.  <<<<--------");
+                        Console.ReadKey();
+                        System.Diagnostics.Process.GetCurrentProcess().Kill();
+                        return;
+
                     }
-                    else { WinAPI.LoadLibrary("dinput8.dll"); }
+                    else {
+                        
+                        WinAPI.LoadLibrary("dinput8.dll");
+                        HookInputType = InputType.WndProc;
+                    }
 
 
                     //    //DirectInput8Create_t OriginalFunction = (DirectInput8Create_t)GetProcAddress("dinput8.dll", "DirectInput8Create");
                     //    // Convert c++ code : https://github.com/pampersrocker/DInput8HookingExample to C#
-                    
+
                 }
 
             }
@@ -140,46 +167,94 @@ namespace DX9ImHook
               Runtine = false;
             }
 
-
             try
             {
-                Console.WriteLine("Game WindowHandle  -->> " + GameHandle.ToString());
-
-                //// WndProc Hook
-
-                WndProc_Hook = new WindowHook(GameHandle, "ImHookWndProc");
-                WndProc_Hook.Enable();
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine("WndProc_Hook Attach!");
+               
             }
             catch (Exception ex)
             {
-                // WndProc Failed!
+                Console.WriteLine("RawInputHook Error: " + ex.Message);
+                Runtine = false;
+            }
+
+
+            try
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+
+                Console.WriteLine("Hooking " + HookInputType.ToString());
+
+                switch (HookInputType)
+                {
+                    case InputType.WndProc:
+                        // WndProc Hook
+
+                        WndProc_Hook = new WindowHook(GameHandle, "ImHookWndProc");
+                        WndProc_Hook.Enable();
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        Console.WriteLine("WndProc_Hook Attach!");
+                        break;
+                    case  InputType.RawInput:
+                        // RawInput Hook
+
+                        RawInputHook RawInput_Hook = new RawInputHook(GameHandle);
+                        RawInput_Hook.FindAndHook();
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        Console.WriteLine("RawInput_Hook Attach!");
+                        break;
+                    case InputType.UniversalUnsafe:
+                        // DefWindowProcW Hook
+
+                        UniversalWindowMessageHook DefWindowProcW_Hook = new UniversalWindowMessageHook(GameHandle);
+                        DefWindowProcW_Hook.FindAndHook();
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        Console.WriteLine("DefWindowProcW_Hook Attach!");
+                        break;
+                    default:
+                        Deprecated_KeyStateAsync = true;
+                        break;
+                }
+
+              
+            }
+            catch (Exception ex)
+            {
+                // Input Hook Failed!
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Error: " + ex.Message);
+                Console.WriteLine(HookInputType.ToString() + " Error: " + ex.Message);
                 Deprecated_KeyStateAsync = true;
             }
 
             Console.ForegroundColor = ConsoleColor.White;
 
             while (Runtine)  {
+                try
+                {
+                    Thread.Sleep(10);
 
-                Thread.Sleep(10);
+                    // Deprecated, replaced by WndProc Hook, See WindowHook.cs class <<<<<-------------
 
-                // Deprecated, replaced by WndProc Hook, See WindowHook.cs class <<<<<-------------
-
-                if (Deprecated_KeyStateAsync == true)  {
-
-                    int keyState = WinAPI.GetAsyncKeyState(Keys.Insert);
-
-                    if (keyState == 1 || keyState == -32767)
+                    if (Deprecated_KeyStateAsync == true)
                     {
-                        ShowImGui_UI = !ShowImGui_UI;
-                        WinAPI.ShowCursor(ShowImGui_UI);
+
+                        int keyState = WinAPI.GetAsyncKeyState(Keys.Insert);
+
+                        if (keyState == 1 || keyState == -32767)
+                        {
+                            ShowImGui_UI = !ShowImGui_UI;
+                            WinAPI.ShowCursor(ShowImGui_UI);
+                        }
+
                     }
 
-                }
+                    //Application.DoEvents(); // UnFreezing Forms Opens
 
+                }
+                catch (Exception ex)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Main bucle Error: " + ex.Message);
+                }
             }
 
             ImplDX9.Shutdown();
