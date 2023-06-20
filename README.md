@@ -17,9 +17,15 @@ If you like this project, you can consider making a donation. Help us continue t
 
 # Preview
 
+- HALO CE / DirectX9 / DirectInput8
+  
 https://github.com/DestroyerDarkNess/DX9ImHook/assets/32405118/c41d63e5-9167-478d-ae67-9be3cb8d504a
 
 
+
+- GFXTest32 / DirectX9 / RawInput
+
+https://github.com/DestroyerDarkNess/DX9ImHook/assets/32405118/dfdcb5aa-f16d-4a41-abe4-b43880d0346a
 
 
 
