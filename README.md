@@ -13,7 +13,8 @@ If you like this project, you can consider making a donation. Help us continue t
 1) Download and Build the project.
 2) You will get **DX9ImHook.dll** , which you will export Function **dllmain.EntryPoint** with my project: - [Unmanaged.Net](https://github.com/DestroyerDarkNess/Unmanaged.Net)
 4) Inject the exported DLL in a game that uses DirectX9 for example haloCE
-5) If you still can't get the project working, then contact me on my discord. **(You will find it in my github profile.)**
+5) Press **Insert** Key to Open Menu.
+6) If you still can't get the project working, then contact me on my discord. **(You will find it in my github profile.)**
 
 # Preview
 
