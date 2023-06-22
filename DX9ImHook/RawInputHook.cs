@@ -58,9 +58,12 @@ namespace DX9ImHook
 
             //WinAPI.PostMessage(Form.Handle, message.Msg, message.WParam, message.LParam); ' Send to Form, External Hook
 
-            if (Dx_Hooks.g_Initialized == true)
+            if (Values.g_Initialized == true)
             {
-
+                //Console.SetCursorPosition(0, Console.CursorTop - 1);
+                //Utils.ClearCurrentConsoleLine();
+                //Console.WriteLine("[RawInput] -> " + (WM)message.Msg);
+               
 
                 if ((WM)message.Msg == WM.KEYDOWN && (int)message.WParam == dllmain.KeyMenu)
                 {

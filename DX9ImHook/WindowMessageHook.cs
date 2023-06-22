@@ -48,11 +48,15 @@ namespace DX9ImHook
            
                 //WinAPI.PostMessage(Form.Handle, message.Msg, message.WParam, message.LParam); ' Send to Form, External Hook
 
-                if (Dx_Hooks.g_Initialized == true)
+                if (Values.g_Initialized == true)
                 {
 
+                //Console.SetCursorPosition(0, Console.CursorTop - 1);
+                //Utils.ClearCurrentConsoleLine();
+                Console.WriteLine("[UniversalUnsafe] -> " + (WM)msg);
 
-                    if ((WM)msg == WM.KEYDOWN && (int)wParam == dllmain.KeyMenu)
+
+                if ((WM)msg == WM.KEYDOWN && (int)wParam == dllmain.KeyMenu)
                     {
 
                         dllmain.ShowImGui_UI = !dllmain.ShowImGui_UI;

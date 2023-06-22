@@ -50,6 +50,7 @@
     <Reference Include="ImGui.NET">
       <HintPath>..\..\ImguiTest\cimgui\ImGui.NET.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Microsoft.Win32.Primitives, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Win32.Primitives.4.3.0\lib\net46\Microsoft.Win32.Primitives.dll</HintPath>
       <Private>True</Private>
@@ -215,13 +216,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="cimgui_wrapper.cs" />
+    <Compile Include="ModernWndProcHook.cs" />
+    <Compile Include="D3D9PresentHook.cs" />
+    <Compile Include="D3D9ResetHook.cs" />
     <Compile Include="d3d9_indexes.cs" />
     <Compile Include="dllmain.cs" />
-    <Compile Include="Dx_Hooks.cs" />
+    <Compile Include="D3D9EndSceneHook.cs" />
+    <Compile Include="MouseCursorHook.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RawInputHook.cs" />
+    <Compile Include="Utils.cs" />
+    <Compile Include="Values.cs" />
     <Compile Include="WinAPI.cs" />
-    <Compile Include="WindowHook.cs" />
+    <Compile Include="OldWindowHook.cs" />
     <Compile Include="WindowMessageHook.cs" />
     <Compile Include="WM.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">

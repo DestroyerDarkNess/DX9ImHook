@@ -1,7 +1,11 @@
 ﻿using ImGuiNET;
+using Microsoft.VisualBasic.ApplicationServices;
+using Microsoft.VisualBasic.Devices;
+using Process.NET.Windows;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -16,33 +20,46 @@ namespace DX9ImHook
 
       public enum InputType
         {
-            WndProc = 0,
+            OldWndProc = 0,
             RawInput = 1,
-            UniversalUnsafe = 2
+            UniversalUnsafe = 2,
+            ModernWndProc = 3
       }
 
-
+        public enum D3d9HookType
+        {
+            EndScene = 0,
+            Present = 1
+        }
 
         public static int KeyMenu = 0x2D; // VK_INSERT
         public static IntPtr GameHandle = IntPtr.Zero;
         public static void EntryPoint()
         {
+            // Some games like GtaSA have a certain delay in displaying the window,
+            // so the MainWindowHandle cannot be obtained, To fix this we will place a timeout.
+            // System.Threading.Thread.Sleep(5000);
 
-            GameHandle = System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;
-            
+            // Another solution to this, is to make a small loop looking for the game window,
+            // until you get the handle, using the WinAPI FindWindow.
+
+            //You can also call 'Process.GetCurrentProcess().MainWindowHandle' in a loop, until the result is different from 0.
+            while (GameHandle.ToInt32() == 0)   {
+                GameHandle = System.Diagnostics.Process.GetCurrentProcess().MainWindowHandle;  // Get Main Game Window Handle
+            }
+
 
             /* WinAPI.AllocConsole();*/ // It Change GetCurrentProcess().MainWindowHandle , USE : GameHandle = WinAPI.FindWindow(null, "Halo");
             WinAPI.AllocConsole();
 
             Console.WriteLine("Game WindowHandle  -->> " + GameHandle.ToString());
 
-
+            MouseCursorHookType HookCursorType = MouseCursorHookType.None;
             InputType HookInputType = InputType.UniversalUnsafe;
-
+            D3d9HookType D3dHook = D3d9HookType.EndScene;
 
             try
             {
-
                 // Extract important and native resources.
                 System.IO.File.WriteAllBytes("cimgui.dll", Properties.Resources.cimgui);
                 System.IO.File.WriteAllBytes("EasyLoad32.dll", Properties.Resources.EasyLoad32);
@@ -53,8 +70,6 @@ namespace DX9ImHook
                 System.IO.File.WriteAllBytes("EasyHook64.dll", Properties.Resources.EasyHook64);
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("All Resources were successfully extracted.");
-                
-
             }
             catch (Exception ex)
             {
@@ -62,7 +77,8 @@ namespace DX9ImHook
                 Console.WriteLine("Failed to Extract Resources: " + ex.Message);
             }
 
-            try {
+            try
+            {
                 // Fix RawImput
                 // Fixed Menu on RawImput Games, Type HALO 
 
@@ -79,20 +95,24 @@ namespace DX9ImHook
                         try
                         {
                             // By : https://github.com/geeky/dinput8wrapper
-                            System.IO.File.WriteAllBytes("dinput8.dll", Properties.Resources.dinput8);
+
+                            System.IO.File.WriteAllBytes("dinput8.dll", Properties.Resources.dinput8); // <<<----  On windows it sometimes fails with UnauthorizedAccessException, such as when the game is on a drive other than the OS drive.
+
+                            Console.ForegroundColor = ConsoleColor.Magenta;
+                            Console.WriteLine("------->>>>  DirectInput8 is Patched, YOU MUST RESTART THE GAME.  <<<<--------");
+                            Console.ReadKey();
+                            System.Diagnostics.Process.GetCurrentProcess().Kill();
+                            return;
+
                         }
-                        catch { }
-                        Console.ForegroundColor = ConsoleColor.Magenta;
-                        Console.WriteLine("------->>>>  DirectInput8 is Patched, YOU MUST RESTART THE GAME.  <<<<--------");
-                        Console.ReadKey();
-                        System.Diagnostics.Process.GetCurrentProcess().Kill();
-                        return;
+                        catch (UnauthorizedAccessException Ex) { Console.WriteLine("dinput8 patch Error: " + Ex.Message); }
 
                     }
-                    else {
-                        
+                    else
+                    {
+
                         WinAPI.LoadLibrary("dinput8.dll");
-                        HookInputType = InputType.WndProc;
+                        HookInputType = InputType.ModernWndProc;
                     }
 
 
@@ -146,37 +166,101 @@ namespace DX9ImHook
                 Console.WriteLine("Costura Error: " + ex.Message);
                 Console.ReadKey();
             }
-
-
             
             bool Runtine = true;
             bool Deprecated_KeyStateAsync = false;
 
-            WindowHook WndProc_Hook = null;
+
+            //For Custom Input Hook
+
+            bool RetrieveWndProcMessages = false;
 
             try
             {
+                // Identify the Game.
+
+                string ProcName = Path.GetFileNameWithoutExtension(System.Diagnostics.Process.GetCurrentProcess().ProcessName);
+
+                Console.WriteLine($"Game: {ProcName}");
+
+                switch (ProcName.ToLower())
+                {
+                    case "gta_sa":
+                        // Set Specifig Hook
+
+                        HookInputType = InputType.ModernWndProc;
+                        D3dHook = D3d9HookType.Present;
+                        HookCursorType = MouseCursorHookType.SetCursorPos;
+                        RetrieveWndProcMessages = true;
+
+                        break;
+                    case "haloce":
+
+                        break;
+                    default:
+
+                        break;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Identify Game Error: " + ex.Message);
+            }
+
+            try
+            {
+                // Hook Mouse Cursor From Games Type GTA SA.
+                MouseCursorHook NewHookCursor = new MouseCursorHook(GameHandle, HookCursorType);
+                NewHookCursor.FindAndHook();
+                Console.WriteLine("Mouse Cursor Hooked!");
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Failed to Hook Mouse Cursor: " + ex.Message);
+            }
+
+
+            try
+            {
+                // Hook DX9 EndScene Or Present
+
                 Console.ForegroundColor = ConsoleColor.White;
-                // Hook DX9 EndScene
-                Dx_Hooks NewEndSceneHook = new Dx_Hooks();
-                NewEndSceneHook.FindAndHook();
-            }
-            catch (Exception ex)
-            {
-              Console.WriteLine("NewEndSceneHook Error: " + ex.Message);
-              Runtine = false;
-            }
+                Console.WriteLine("Hooking " + D3dHook.ToString());
 
-            try
-            {
-               
+                switch (D3dHook)
+                {
+                    case D3d9HookType.EndScene:
+                        // EndScene Hook
+
+                        D3D9EndSceneHook NewEndSceneHook = new D3D9EndSceneHook();
+                        NewEndSceneHook.FindAndHook();
+
+                        break;
+                    case D3d9HookType.Present:
+                        // Present Hook
+
+                        D3D9PresentHook NewD3D9PresentHook = new D3D9PresentHook();
+                        NewD3D9PresentHook.FindAndHook();
+
+                        break;
+                    default:
+                     
+                        break;
+                }
+
+                D3D9ResetHook NewD3D9ResetHook = new D3D9ResetHook();
+                NewD3D9ResetHook.FindAndHook();
+
             }
             catch (Exception ex)
             {
-                Console.WriteLine("RawInputHook Error: " + ex.Message);
+                Console.ForegroundColor= ConsoleColor.Red;
+                Console.WriteLine(D3dHook.ToString() + " Error: " + ex.Message);
                 Runtine = false;
             }
-
 
             try
             {
@@ -186,10 +270,10 @@ namespace DX9ImHook
 
                 switch (HookInputType)
                 {
-                    case InputType.WndProc:
+                    case InputType.OldWndProc:
                         // WndProc Hook
 
-                        WndProc_Hook = new WindowHook(GameHandle, "ImHookWndProc");
+                        OldWindowHook WndProc_Hook = new OldWindowHook(GameHandle, "ImHookWndProc");
                         WndProc_Hook.Enable();
                         Console.ForegroundColor = ConsoleColor.Cyan;
                         Console.WriteLine("WndProc_Hook Attach!");
@@ -209,6 +293,13 @@ namespace DX9ImHook
                         DefWindowProcW_Hook.FindAndHook();
                         Console.ForegroundColor = ConsoleColor.Cyan;
                         Console.WriteLine("DefWindowProcW_Hook Attach!");
+                        break;
+                    case InputType.ModernWndProc:
+                        
+                        ModernWndProcHook CustomWndProc_Hook = new ModernWndProcHook(GameHandle);
+                        CustomWndProc_Hook.ReturnOrigMessage = RetrieveWndProcMessages;
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        Console.WriteLine("Modern WndProc Hook Attach!");
                         break;
                     default:
                         Deprecated_KeyStateAsync = true;
@@ -233,6 +324,7 @@ namespace DX9ImHook
                     Thread.Sleep(10);
 
                     // Deprecated, replaced by WndProc Hook, See WindowHook.cs class <<<<<-------------
+
 
                     if (Deprecated_KeyStateAsync == true)
                     {
@@ -260,7 +352,6 @@ namespace DX9ImHook
             ImplDX9.Shutdown();
             ImplWin32.Shutdown();
 
-            WndProc_Hook.Disable();
 
         }
 
