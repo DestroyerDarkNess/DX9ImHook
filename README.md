@@ -3,7 +3,7 @@
 
 ⚠️ Please, if you like this project, give me a ✨Star✨
 
-This is an example of how to hook Endscene for DX9 and use imgui for some separate process, for example games.
+This is an example of how to hook Endscene or Present for DX9 and use imgui for some separate process, for example games.
 
 If you like this project, you can consider making a donation. Help us continue to improve the tool.
 [![Doate Image](https://raw.githubusercontent.com/poucotm/Links/master/image/PayPal/donate-paypal.png)][PM] 
