@@ -3,6 +3,8 @@
 
 ⚠️ Please, if you like this project, give me a ✨Star✨
 
+🛑 This Repository is Obsolete, I made a better implementation, with less dependencies, cleaner, less code and easy to use 🚬🗿 : [RenderSpy.Imgui](https://github.com/DestroyerDarkNess/RenderSpy.Imgui) 🛑
+
 This is an example of how to hook Endscene or Present for DX9 and use imgui for some separate process, for example games.
 
 If you like this project, you can consider making a donation. Help us continue to improve the tool.
